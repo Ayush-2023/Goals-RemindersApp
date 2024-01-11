@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/resets.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Software Requirement Specification</title>
+</head>
+
+<body>
+    <header class="document-header">
+        <div class="document-title">
+            Software Requirement Specification
+        </div>
+
+        <div class="document-title-description">
+            For: Backend API Service of Goals & Reminders(G&R) App(v1)
+        </div>
+    </header>
+
+    <main>
+        <section>
+            <header class="section-header">
+                1 Indroduction
+            </header>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    1.1 Purpose
+                </header>
+
+                <p>
+                    Provide Restful Interface for the G&R App( an app for mananging daily routine tasks) frontend
+                    developers.
+                </p>
+            </section>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    1.2 Intended Audience and Use
+                </header>
+
+                <p> The intended audience of service users include
+                <ul>
+                    <li>Developers: The API service is designed to serve G&R frontend Developers(mainly website, mobile
+                        app)</li>
+                    <li>Testers: The API service can be used by testers to test the possibilities of flaws in
+                        implementations</li>
+                    <li>Genral Users: The API service can be used by general audience to explore the features and
+                        suggest improvements to it</li>
+                </ul>
+                </p>
+            </section>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    1.3 Service Scope
+                </header>
+
+                <p>
+                    The API Service will provide a Restful Interface to the developers who want to serve
+                    those who want to manage their day-to-day tasks, helping them store/retrieve the data from database
+                    using API service.
+                </p>
+            </section>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    1.4 Definitions and Acronyms
+                </header>
+
+                <p>
+                    Some terminoligies used for interfacing the API services are as follows:
+                <ul>
+                    <li>User: A user is a user of G&R App who wants to manage his/her day-to-day tasks</li>
+                    <li>Task: A task is a piece of work that can be completed by and be reminded to the users who want
+                        to perform it on a particular day. These are characterized by their title</li>
+                    <li>Routine Task: Routine Task are peice of work that a user wants to perform after a regualr amount
+                        of time, called Repeat Duration(s). They are characterized by thier Task Characterstics, Start
+                        Time and Repeat Duration</li>
+                    <li>Repeat Duration(s): Repeat Duration(s) is/are amount of time(s) after which the Routine tasks
+                        are Assigned to any user. The can be days of a week, dates of months, or dates of years</li>
+                    <li>Goal Task: Goal Task are piece of work that a user needs to perform to progress towards
+                        achieving his/her Goal. They are characterized by their Task Characterstics and Deadline</li>
+                    <li>Scheduled Task: Scheduled Task are piece of work that a user needs to perform on a particular
+                        day and time. They are characterized by their Task Characterstics and Scheduled Time</li>
+                    <li>Remider: Reminder is notification for the user who has been assigned a particular task.<br>
+                        For Routine Task reminders are created at Start Time day and on the day, the Repeat Duration
+                        Time occurs,<br>
+                        For Goal Task Remider is created at the time of creation, and <br>
+                        For Scheduled Task Reminder is created on the scheduled day.</li>
+                </ul>
+                </p>
+            </section>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    1.5 References
+                </header>
+
+                <p>
+                    The API service is inspired by general idea of Alarm Clock App found in everyone's Phones. The SRS
+                    Doc of
+                    <a href="https://todomoo.sourceforge.io/SRS%20for%20Todomoo.pdf">Todomoo App</a>
+                    was taken as reference for this SRS. Google Tasks App was taken as front-end client reference.
+                </p>
+            </section>
+        </section>
+
+        <section>
+            <header class="section-header">
+                2 Overall Description
+            </header>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    2.1 Service Perspective
+                </header>
+
+                <p>
+                    This API can be used by Developers of G&R App, where they can serve those in need to manage their
+                    day-to-day tasks.
+                    <br>
+                    The API will be build on Tech Stack of Node.js, Express.js, MongoDB hosted on Render website. It can
+                    be directly accessed over internet.
+                    <br>
+                    Future Scope of software include paginated implementations of Fetch(READ) Functionalities, caching
+                    and google signups.
+                </p>
+            </section>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    2.2 User Class and Characterstics
+                </header>
+
+                <p>
+                    API service can be used by any FrontEnd Developer, API Tester, or any user interested in exploring
+                    the features of the Service
+                </p>
+            </section>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    2.3 Assumptions and Dependencies
+                </header>
+
+                <p>
+                    The API service assumes proper working of Node.js, Express.js, and MongoDB technology on respective
+                    system. Also assumes proper working of Render Hosting service
+                </p>
+            </section>
+        </section>
+
+        <section>
+            <header class="section-header">
+                3 Service Features and Requirements
+            </header>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    3.1 Functional Requirements
+                </header>
+
+                <p>
+                <ol>
+                    <li>Creating New Goals and Task-List</li>
+                    <li>Creating Tasks in their Goals and Task-List</li>
+                    <li>Fetching Goals and Tasks-List</li>
+                    <li>Fetching Task of a particular List</li>
+                    <li>Fetching Task Details(Status of Task)</li>
+                    <li>Editing Goals and Task-List Details</li>
+                    <li>Editing Task Details like Deadline/Schedule/Start Time of a Task</li>
+                    <li>Editing Repeat Duration of a Repetitive Task</li>
+                    <li>Marking a Task to completed</li>
+                    <li>Marking a Remider to be acknowledged</li>
+                    <li>Deleteing Goal and Task-List</li>
+                    <li>Deleting Task of a Goal or Task-List</li>
+                </ol>
+                </p>
+            </section>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    3.2 External Interface Requirements
+                </header>
+
+                <p>
+                <ol>
+                    <li>
+                        Uniform Access accross environments
+                    </li>
+                </ol>
+                </p>
+            </section>
+
+            <section class="sub-section">
+                <header class="sub-section-header">
+                    3.3 Non Functional Requirements
+                </header>
+
+                <p>
+                <ol>
+                    <li>Restful Interface</li>
+                    <li>Persistence of Data accross sessions</li>
+                    <li>Consistency of Data accross sessions</li>
+                    <li>Availability of Service</li>
+                    <li>Efficiency in delivering service</li>
+                </ol>
+                </p>
+            </section>
+        </section>
+    </main>
+
+</body>
+
+</html>
