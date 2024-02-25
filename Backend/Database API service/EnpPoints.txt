@@ -1,0 +1,30 @@
+# Endpoints
+
+- *== url:8000/api
+- testUserID = "65a62ef89100c17640d6e8fc"
+
+
+## User Routes
+- GET: ,user				        ,*/user/:userID
+- POST:, create user				,*/user
+- GET: ,user tasklist			    ,*/user/:userID/tasklists
+- GET: ,user reminders		        ,*/user/:userID/reminders
+- GET: ,user goals 				    ,*/user/:userID/goals
+
+- for careating user: name is required
+
+## Tasklist Routes(needs userID as body param)
+- GET: ,tasklist					        ,*/tasklist/:tasklistID
+- POST:, create tasklist for a user 		,*/tasklist
+- GET: ,tasks in tasklist			        ,*/tasklist/:tasklistID/tasks
+
+- for creating tasklist: title, description, category is required
+- for creating goals: deadline is also required
+
+## Task Routes(needs userID, tasklistID as body param)
+- GET: ,task					                ,*/task/:taskID
+- POST:, create a task for a tasklist		    ,*/task
+
+- for creating task: title and categpry is required 
+- for creating scheduled task: scheduled time is als required
+- for creating routine task: durationType, startTime is also required, along with duration data

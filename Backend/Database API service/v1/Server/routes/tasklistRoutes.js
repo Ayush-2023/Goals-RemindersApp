@@ -1,7 +1,9 @@
 const express = require("express")
 const tasklistRouter = express.Router()
-const { userAuthentication } = require("../middlewares/userAuthenticationMiddleware")
+const { userVerification } = require("../middlewares/userAuthenticationMiddleware")
 const tasklistController = require("../controllers/tasklistController")
+const { validationForTasklistAccess, findTasklistWithID } = require("../middlewares/requestAuthorizationMiddleware")
+
 
 tasklistRouter.use("/", (req, res, next) => {
     console.log("User Tasklist Route")
@@ -9,9 +11,9 @@ tasklistRouter.use("/", (req, res, next) => {
 })
 
 tasklistRouter
-    .get("/:tasklistID", express.json(), userAuthentication, tasklistController.getTasklistWithID)
-    .get("/:tasklistID/tasks", express.json(), userAuthentication, tasklistController.getTasksFromTasklistWithID)
-    .post("/", express.json(), userAuthentication, tasklistController.createTasklist)
+    .get("/:tasklistID", express.json(), userVerification, validationForTasklistAccess, findTasklistWithID, tasklistController.getTasklistWithID)
+    .get("/:tasklistID/tasks", express.json(), userVerification, validationForTasklistAccess, findTasklistWithID, tasklistController.getTasksFromTasklistWithID)
+    .post("/", express.json(), userVerification, tasklistController.createTasklist)
 
 module.exports = {
     tasklistRouter
