@@ -13,13 +13,21 @@ const saveNewTasklistForUser = async (user, tasklist) => {
         user.tasklists.push(tasklist)
         await user.save()
     } catch (error) {
+<<<<<<< HEAD
         throw new InternalServerError("Internal Server Error: Unable to save tasklist")
+=======
+        throw InternalServerError("Internal Server Error: Unable to save tasklist")
+>>>>>>> 7a5f80e35db74db23b8e52d013726351bfba7437
     }
 }
 
 function createGoal(title, description, deadline) {
     if (!deadline || !title || !description) { 
+<<<<<<< HEAD
         throw new InsufficientDataError("Bad Request: Provide parameters for creating Goal")
+=======
+        throw InsufficientDataError("Bad Request: Provide parameters for creating Goal")
+>>>>>>> 7a5f80e35db74db23b8e52d013726351bfba7437
     }
 
     return new Goal({
@@ -31,7 +39,11 @@ function createGoal(title, description, deadline) {
 
 function createReminder(title, description) {
     if (!title || !description) { 
+<<<<<<< HEAD
         throw new InsufficientDataError("Bad Request: Provide parameters for creating Goal")
+=======
+        throw InsufficientDataError("Bad Request: Provide parameters for creating Goal")
+>>>>>>> 7a5f80e35db74db23b8e52d013726351bfba7437
     }
 
     return new Reminder({
@@ -58,7 +70,11 @@ const createTasklist = async (req, res) => {
     } else if (category === "Reminder") {
         tasklist = createReminder(title, description)
     } else {
+<<<<<<< HEAD
         throw new InvalidDataError("Bad Request: Provide valid category of tasklist")
+=======
+        throw InvalidDataError("Bad Request: Provide valid category of tasklist")
+>>>>>>> 7a5f80e35db74db23b8e52d013726351bfba7437
     }
 
     await saveNewTasklistForUser(user, tasklist)

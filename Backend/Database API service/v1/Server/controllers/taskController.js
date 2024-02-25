@@ -13,6 +13,13 @@ const { WeekDay } = require("../database/models/lookup/weekday")
 const { Month } = require("../database/models/lookup/month")
 const { RoutineTask } = require("../database/models/task/routinetask")
 const { ResourceNotFoundError } = require("../ErrorHandling/ResourceNotFoundError")
+<<<<<<< HEAD
+=======
+
+const findTaskInTasklist = (tasklist, taskID) => {
+
+}
+>>>>>>> 7a5f80e35db74db23b8e52d013726351bfba7437
 
 const getTaskWithID = async (req, res) => {
     const { taskID } = req.params
@@ -20,7 +27,11 @@ const getTaskWithID = async (req, res) => {
     const task = await Task.findById(taskID)
 
     if(!task) {
+<<<<<<< HEAD
         throw new ResourceNotFoundError("Resource Not Found: Cannot find Task with given ID")
+=======
+        throw ResourceNotFoundError("Resource Not Found: Cannot find Task with given ID")
+>>>>>>> 7a5f80e35db74db23b8e52d013726351bfba7437
     }
 
     return res.status(200).json( {
