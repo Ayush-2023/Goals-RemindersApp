@@ -4,33 +4,32 @@ const { Tasklist } = require("../database/models/task-list/task-list")
 const { Reminder } = require("../database/models/task-list/reminder")
 const { Goal } = require("../database/models/task-list/goal")
 
-const userAuthentication = async (req, res, next) => {
-
+const saveUser = async (newUser) => {
+    try {
+        await newUser.save()
+        return res.status(201).json({
+            id: newUser.id
+        })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            error: "Server unable to process request",
+        })
+    }
 }
 
 const createUser = async (req, res) => {
     const { name } = req.body
 
     if (!name) {
-        res.status(400).json({
+        return res.status(400).json({
             error: "Bad Request, Username is required"
         })
     }
 
-    try {
-        const newUser = User({
-            name: name
-        })
-        await newUser.save()
-        res.status(201).json({
-            id: newUser.id
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            error: "Server unable to process request",
-        })
-    }
+    saveUser( new User( {
+        name: name
+    }))
 }
 
 const getUserForID = async (req, res) => {
@@ -50,7 +49,7 @@ const getTasklistsForUserWithID = async (req, res) => {
         tasklists.push( await Tasklist.findById(tasklistID))
     }
 
-    res.status(200).json( {
+    return res.status(200).json( {
         tasklists: tasklists
     })
 }
@@ -65,17 +64,16 @@ const getGoalsForUserWithID = async (req, res) => {
         if(tasklist.count > 0) {
             goals.push( await tasklist)
         }
-        
     }
 
-    res.status(200).json( {
+    return res.status(200).json( {
         goals
     })
 }
 
 const getRemindersForUserWithID = async (req, res) => {
     const user = req.body.user
-    console.log(user)
+
     let reminders = []
 
     for(let tasklistID of user.tasklists) {
@@ -85,7 +83,7 @@ const getRemindersForUserWithID = async (req, res) => {
         }
     }
 
-    res.status(200).json( {
+    return res.status(200).json( {
         reminders
     })
 }

@@ -3,135 +3,96 @@ const { Tasklist } = require("../database/models/task-list/task-list")
 const { Goal } = require("../database/models/task-list/goal")
 const { Reminder } = require("../database/models/task-list/reminder")
 const { Task } = require("../database/models/task/task")
+const { InsufficientDataError } = require("../ErrorHandling/InsufficientDataError")
+const { InvalidDataError } = require("../ErrorHandling/InvalidDataError")
+const { InternalServerError } = require("../ErrorHandling/InternalServerError")
 
-async function saveNewTasklistForUser(user, tasklist) {
+const saveNewTasklistForUser = async (user, tasklist) => {
     try {
         await tasklist.save()
         user.tasklists.push(tasklist)
         await user.save()
     } catch (error) {
-        throw new Error("Unable to save new tasklist")
+        throw new InternalServerError("Internal Server Error: Unable to save tasklist")
     }
 }
 
 function createGoal(title, description, deadline) {
-    if (!deadline) {
-        res.status(400).json({
-            error: "Bad request, Goals need deadline"
-        })
-    } else {
-        return new Goal({
-            title: title,
-            description: description,
-            deadline: req.body.deadline
-        })
+    if (!deadline || !title || !description) { 
+        throw new InsufficientDataError("Bad Request: Provide parameters for creating Goal")
     }
+
+    return new Goal({
+        title: title,
+        description: description,
+        deadline: deadline
+    })
 }
 
 function createReminder(title, description) {
+    if (!title || !description) { 
+        throw new InsufficientDataError("Bad Request: Provide parameters for creating Goal")
+    }
+
     return new Reminder({
         title: title,
         description: description
     })
 }
 
-const authorizeTasklistAccess = ( user, tasklistID ) => {
-
-    if (!mongoose.Types.ObjectId.isValid(tasklistID)) {
-        res.status(400).json( {
-            error: "Bad Request, provide valid tasklistID"
-        })
-        return false
-    }
-
-    if (!user || !user.tasklists.find( id => id.equals( new mongoose.Types.ObjectId(tasklistID)))) {
-        res.status(403).json({
-            error: "Forbidden"
-        })
-        return false
-    }
-    return true
-}
-
 const getTasklistWithID = async (req, res) => {
-    const { tasklistID } = req.params
-    const { user } = req.body
-
-    if(!authorizeTasklistAccess(user, tasklistID)) {
-        return
-    }
-
-    const tasklist = await Tasklist.findById(tasklistID)
-
-    if (!tasklist) {
-        res.status(404).json({
-            error: "Could not find tasklist"
-        })
-    } else {
-        res.status(200).json({
-            tasklist: tasklist
-        })
-    }
+    const { tasklist } = req.body
+    
+    return res.status(200).json({
+        tasklist: tasklist
+    })
 }
 
 const createTasklist = async (req, res) => {
     const { user, title, description, category, deadline } = req.body
 
-    const tasklist = (() => {
-        if (category === "Goal") {
-            return createGoal(title, description, deadline)
-        } else if (category === "Reminder") {
-            return createReminder(title, description)
-        }else {
-            res.status(400).json({
-                error: "Bad request, Cannot interpret tasklist category"
-            })
-        }
-    })()
+    let tasklist = undefined
 
-    try {
-        await saveNewTasklistForUser(user, tasklist)
-        res.status(201).json({
-            id: tasklist.id
-        })
-    } catch (error) {
-        res.status(500).json({
-            error: "Internal Error, " + error.message
-        })
+    if (category === "Goal") {
+        tasklist = createGoal(title, description, deadline)
+    } else if (category === "Reminder") {
+        tasklist = createReminder(title, description)
+    } else {
+        throw new InvalidDataError("Bad Request: Provide valid category of tasklist")
     }
+
+    await saveNewTasklistForUser(user, tasklist)
+
+    res.status(201).json({
+        id: tasklist.id
+    })
 }
 
 const getTasksFromTasklistWithID = async (req, res) => {
-    const { tasklistID } = req.params
-    const { user } = req.body
+    const { tasklist } = req.body
 
-    if(!authorizeTasklistAccess(user, tasklistID)) {
-        return
+    let tasks = {
+        goalTasks: [],
+        reminders:  {
+            routineTasks: [],
+            scheduledTasks: []
+        }
     }
 
-    const tasklist = await Tasklist.findById(tasklistID)
-
-    if(!tasklist) {
-        res.status(404).json({
-            error: "Cannot find tasklist with given ID"
-        })
-        return
-    }
-    let tasks = []
     if(tasklist.category === "Goal") {
         for(let taskID of tasklist.goalTasks) {
-            tasks.push(await Task.findById(taskID))
+            tasks.goalTasks.push(await Task.findById(taskID))
         }
-    }else if(tasklist.category === "Reminder") {
+    } else if(tasklist.category === "Reminder") {
         for(let taskID of tasklist.routineTasks) {
-            tasks.push(await Task.findById(taskID))
+            tasks.reminders.routineTasks.push(await Task.findById(taskID))
         }
         for(let taskID of tasklist.scheduledTasks) {
-            tasks.push(await Task.findById(taskID))
+            tasks.reminders.scheduledTasks.push(await Task.findById(taskID))
         }
     }
 
-    res.status(200).json( {
+    return res.status(200).json( {
         tasks: tasks
     })
 }

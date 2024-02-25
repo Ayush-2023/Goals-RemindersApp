@@ -12,63 +12,20 @@ const { YearlyDuration } = require("../database/models/task/routine_duration/yea
 const { WeekDay } = require("../database/models/lookup/weekday")
 const { Month } = require("../database/models/lookup/month")
 const { RoutineTask } = require("../database/models/task/routinetask")
+const { ResourceNotFoundError } = require("../ErrorHandling/ResourceNotFoundError")
 
 const getTaskWithID = async (req, res) => {
     const { taskID } = req.params
-    const { userID, tasklistID } = req.body
-
-    if( !mongoose.Types.ObjectId.isValid(taskID) || !mongoose.Types.ObjectId.isValid(userID) || !mongoose.Types.ObjectId.isValid(tasklistID)) {
-        res.status(400).json( {
-            error: "Bad Request, Provide valid ids for task, tasklist, user"
-        })
-    }
-
-    const user = await User.findById(userID)
-    if (!user || !user.tasklists.find(objectID => objectID.equals(new mongoose.Types.ObjectId(tasklistID)))) {
-        res.status(403).json({
-            error: "Forbidden"
-        })
-    }
-
-    const tasklist = await Tasklist.findById(tasklistID)
-
-    if (!tasklist) {
-        res.status(404).json({
-            error: "Could not find tasklist"
-        })
-        return
-    }
-
-    if(tasklist.category === "Goal") {
-        if (!tasklist.goaltasks.find(objectID => objectID.equals(new mongoose.Types.ObjectId(taskID)))) {
-            res.status(400).json({
-                error: "Bad Request, Tasklist do not have any task with given ID"
-            })
-        }
-    }else if(tasklist.category === "Reminder"){
-        if (!tasklist.routineTasks.find(objectID => objectID.equals(new mongoose.Types.ObjectId(taskID))) && 
-        (!tasklist.scheduledTasks.find(objectID => objectID.equals(new mongoose.Types.ObjectId(taskID))))) {
-            res.status(400).json({
-                error: "Bad Request, Tasklist do not have any task with given ID"
-            })
-        }
-    }else {
-        res.status(500).json( {
-            error: "Internal Server Error"
-        })
-    }
 
     const task = await Task.findById(taskID)
 
     if(!task) {
-        res.status(404).json( {
-            error: "Cannot find Task with given ID"
-        })
-    }else {
-        res.status(200).json( {
-            task: task
-        })     
-    }   
+        throw new ResourceNotFoundError("Resource Not Found: Cannot find Task with given ID")
+    }
+
+    return res.status(200).json( {
+        task: task
+    })     
 }
 
 
@@ -187,7 +144,7 @@ const createRoutineDuration = async (requestBody) => {
 }
 
 const createRoutineTask = async (requestBody) => {
-    const { title } = requestBody
+    const { title, startDate } = requestBody
 
     if (!title) {
         return undefined
@@ -202,7 +159,8 @@ const createRoutineTask = async (requestBody) => {
     await duration.save()
     return RoutineTask( {
         title: title,
-        duration: duration.id
+        duration: duration.id,
+        startDate: startDate
     })
 }
 
@@ -225,30 +183,7 @@ async function saveNewTaskForTasklist(tasklist, task) {
 
 const createTask = async (req, res) => {
 
-    const { userID, tasklistID, title, category, scheduledTime } = req.body
-
-    if(!mongoose.Types.ObjectId.isValid(userID) || !mongoose.Types.ObjectId.isValid(tasklistID)) {
-        res.status(400).json( {
-            error: "Bad Request, Provide valid ids for task, tasklist, user"
-        })
-    }
-
-    const user = await User.findById(userID)
-    if (!user || !user.tasklists.find(objectID => objectID.equals(new mongoose.Types.ObjectId(tasklistID)))) {
-        res.status(403).json({
-            error: "Forbidden"
-        })
-        return
-    }
-
-    const tasklist = await Tasklist.findById(tasklistID)
-
-    if (!tasklist) {
-        res.status(404).json({
-            error: "Could not find tasklist"
-        })
-        return
-    }
+    const { tasklist, title, category, scheduledTime } = req.body
 
     if(!category) {
         res.status(400).json({
@@ -269,24 +204,17 @@ const createTask = async (req, res) => {
         }
     })()
 
-    if(!task) {
-        res.status(501).json( {
-            error: "Not Implemented Yet"
+    try {
+        await saveNewTaskForTasklist(tasklist, task)
+        res.status(201).json( {
+            id: task.id
         })
-        return
-    }else {
-        try {
-            await saveNewTaskForTasklist(tasklist, task)
-            res.status(201).json( {
-                id: task.id
-            })
-        } catch (error) {
-            console.log(error)
-            res.status(500).json({
-                error: "Server unable to process request",
-            })
-        }
+    } catch (error) {
+        res.status(500).json({
+            error: "Server unable to process request",
+        })
     }
+    
 }
 
 module.exports = {

@@ -7,10 +7,21 @@ const { userRouter } = require("./routes/userRoutes")
 const { tasklistRouter } = require("./routes/tasklistRoutes")
 const { taskRouter } = require("./routes/taskRoutes")
 const { setResponseType } = require("./middlewares/apiServiceMiddleware")
+const { forbiddenAccessErrorhandler } = require("./ErrorHandling/ForbiddenAccessError")
+const { insufficientDataErrorHandler } = require("./ErrorHandling/InsufficientDataError")
+const { unauthorizedErrorHandler } = require("./ErrorHandling/UnauthorizedError")
+const { invalidDataErrorHandler } = require("./ErrorHandling/InvalidDataError")
+const { internalServerErrorHandler } = require("./ErrorHandling/InternalServerError")
 
 app.use("/api/user", setResponseType, userRouter)
 app.use("/api/tasklist", setResponseType, tasklistRouter)
 app.use("/api/task", setResponseType, taskRouter)
+
+app.use( forbiddenAccessErrorhandler)
+app.use( insufficientDataErrorHandler)
+app.use( unauthorizedErrorHandler )
+app.use( invalidDataErrorHandler)
+app.use( internalServerErrorHandler)
 
 app.use( (req, res) => {
     res.type = "json"
